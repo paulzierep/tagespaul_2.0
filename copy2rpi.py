@@ -1,5 +1,4 @@
 import os
-import shutil
 import subprocess
 
 from dotenv import load_dotenv
@@ -21,7 +20,7 @@ PI_DATA_FOLDER = f"pi@{PI_IP}:~/Projects/tagespaul_2.0/"
 
 print("*********** copy data to PI ***********")
 
-sub_string = "rsync -av -e ssh {0} {1}".format(
+sub_string = "rsync -av -e ssh {0} {1} --exclude=/.git/ --delete".format(
     PC_DATA_FOLDER,
     PI_DATA_FOLDER,
 )
