@@ -1,6 +1,6 @@
 # Tagespaul 2.0
 
-This is my fun raspberry pi project, which is based on the Tagespaul app https://www.let-verlag.de/tagesspruch
+This is my fun raspberry pi project, which is based on the [Tagespaul app](https://www.let-verlag.de/tagesspruch) 
 Originally, this was developed as a birthday present to my girlfriend.
 
 # Gist
@@ -49,6 +49,7 @@ ifconfig wlan0
 mamba activate tagespaul-remote
 python copy2rpi.py
 ```
+
 Each time you update this folder, e.g. when you add/change the sounds, you can
 update the folder on the PI with this script.
 
@@ -59,6 +60,7 @@ update the folder on the PI with this script.
 ```bash
 cd /home/pi/Projects/tagespaul_2.0/
 pip install -r requirements_PI.txt
+sudo apt-get install mplayer #we use mplayer to play the sounds
 ```
 
 ### Run scrip on start-up
