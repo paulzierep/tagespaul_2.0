@@ -26,9 +26,7 @@ PIXEL_COUNT = 15
 # Alternatively specify a hardware SPI connection on /dev/spidev0.0:
 SPI_PORT = 0
 SPI_DEVICE = 0
-pixels = Adafruit_WS2801.WS2801Pixels(
-    PIXEL_COUNT, spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE), gpio=GPIO
-)
+pixels = Adafruit_WS2801.WS2801Pixels(PIXEL_COUNT, spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE), gpio=GPIO)
 
 ###########################
 # Buttons
@@ -66,89 +64,6 @@ def wheel(pos):
         return Adafruit_WS2801.RGB_to_color(0, pos * 3, 255 - pos * 3)
 
 
-def rainbow_colors(pixels, wait=0.05):
-    for j in range(256):  # one cycle of all 256 colors in the wheel
-        for i in range(pixels.count()):
-            pixels.set_pixel(i, wheel(((256 // pixels.count() + j)) % 256))
-        pixels.show()
-        if wait > 0:
-            time.sleep(wait)
-
-
-def rainbow_colors_range(pixels, wait=0.05, start=0, end=64):
-    for j in range(start, end):  # one cycle of all 256 colors in the wheel
-        print(j)
-        for i in range(pixels.count()):
-            pixels.set_pixel(i, wheel(((256 // pixels.count() + j)) % 256))
-        pixels.show()
-        if wait > 0:
-            time.sleep(wait)
-
-    for j in reversed(range(start, end)):  # one cycle of all 256 colors in the wheel
-        print(j)
-        for i in range(pixels.count()):
-            pixels.set_pixel(i, wheel(((256 // pixels.count() + j)) % 256))
-        pixels.show()
-        if wait > 0:
-            time.sleep(wait)
-
-
-def rainbow_colors_offset(pixels, wait=0.05, offset=3):  # 17 is full wheel, 3 is slow
-    for j in range(256):  # one cycle of all 256 colors in the wheel
-        for i in range(pixels.count()):
-            pixels.set_pixel(
-                i, wheel(((256 // pixels.count() + j + (i * offset))) % 256)
-            )
-        pixels.show()
-        if wait > 0:
-            time.sleep(wait)
-
-
-def rainbow_colors_random(pixels, wait=0.05):
-    for j in range(100):
-        for i in range(pixels.count()):
-            pixels.set_pixel(
-                i, wheel(((256 // pixels.count() + (random.randint(0, 10)))) % 256)
-            )
-        pixels.show()
-        if wait > 0:
-            time.sleep(wait)
-
-
-def set_color_blink(pixels, color=1):
-    print(color)
-    for k in range(20):
-        for i in range(pixels.count()):
-            pixels.set_pixel(i, wheel(((256 // pixels.count() + color)) % 256))
-        pixels.show()
-        time.sleep(0.1)
-        for i in range(pixels.count()):
-            pixels.set_pixel(i, Adafruit_WS2801.RGB_to_color(0, 0, 0))
-        pixels.show()
-        time.sleep(0.1)
-        print(k)
-
-
-def set_color(pixels, color=1):
-    print(color)
-    for i in range(pixels.count()):
-        pixels.set_pixel(i, wheel(((256 // pixels.count() + color)) % 256))
-    pixels.show()
-
-
-def brightness_decrease(pixels, wait=0.002, step=1):
-    for j in range(int(256 // step)):
-        for i in range(pixels.count()):
-            r, g, b = pixels.get_pixel_rgb(i)
-            r = int(max(0, r - step))
-            g = int(max(0, g - step))
-            b = int(max(0, b - step))
-            pixels.set_pixel(i, Adafruit_WS2801.RGB_to_color(r, g, b))
-        pixels.show()
-        if wait > 0:
-            time.sleep(wait)
-
-
 def set_rainbow_colors_offset(pixels, j, wait=0.001, offset=17):
     """
     Make a rainbow that rotates around the lights
@@ -173,7 +88,6 @@ def increase_to_color(pixels, j, color=[0, 0, 256]):
     :j: the time point
     :color:the color to use
     """
-    print(color)
 
     j = j % (256 * 2)
 
@@ -211,52 +125,17 @@ def increase_to_color(pixels, j, color=[0, 0, 256]):
 
         pixels.show()
 
-    print(rgb)
-
-
-def add_range(x, add=30, wheel=256):
-    x = x + add
-
-    x = x % wheel
-
-    return x
-
-
-def flimmer(color):
-    color2 = [0, 0, 0]
-
-    for i in range(3):
-        color2[i] = add_range(color[i])
-
-    return color2
-
-
-def random_dots(pixels, j, color=[0, 0, 256]):
-    if j % 2 == 0:  # do this onle every 10th iteration
-        color_f = flimmer(color)
-
-        print(color)
-        print(color_f)
-
-        for i in range(pixels.count()):
-            if bool(random.getrandbits(1)):
-                # color_f = flimmer(color)
-
-                # print(color_f)
-
-                pixels.set_pixel(
-                    i, Adafruit_WS2801.RGB_to_color(color[0], color[1], color[2])
-                )
-
-            else:
-                pixels.set_pixel(
-                    i, Adafruit_WS2801.RGB_to_color(color_f[0], color_f[1], color_f[2])
-                )
-
-        pixels.show()
+    print("Color: ", rgb)
 
 
 def color_effect(pixels, j, color):
+    """
+    Middleman function that runs the color function
+
+    :pixels: the pixels object
+    :j: the time point
+    :color:the color to use
+    """
     increase_to_color(pixels, j, color)
 
 
@@ -265,11 +144,37 @@ def color_effect(pixels, j, color):
 ###########################
 
 script_path = os.path.dirname(os.path.realpath(__file__))
-sound_path = os.path.join(script_path, "sounds")
+sounds_folder = os.path.join(script_path, "sounds")
+
+###########################
+# Download news podcast on startup
+###########################
+
+
+def download_news():
+    tpaul_path = os.path.join(sounds_folder, "tagespaul")
+    with open(os.path.join(script_path, "youtube_dl_out.txt"), "w") as outfile:
+        player = subprocess.Popen(
+            [
+                "youtube-dl",
+                "https://www.deutschlandfunk.de/nachrichten-108.xml",
+                "--playlist-items",
+                "1",
+                "-o",
+                f"{tpaul_path}/news.mp3",
+            ],
+            # stdin=subprocess.PIPE,
+            stdout=outfile,
+            stderr=subprocess.PIPE,
+            preexec_fn=os.setsid,  # add id
+        )
+
+
+download_news()
 
 
 def play_sound_by_button(sound_type=None):
-    s_path = os.path.join(sound_path, sound_type)
+    s_path = os.path.join(sounds_folder, sound_type)
 
     day_of_year = datetime.now().timetuple().tm_yday
 
@@ -278,9 +183,7 @@ def play_sound_by_button(sound_type=None):
     random.seed(42)  # Needs to be set here or the sound will not be random
     random.shuffle(files)
 
-    file_id = day_of_year % len(
-        files
-    )  # modulo repeats the file_id each time the end of the end of the list is reached
+    file_id = day_of_year % len(files)  # modulo repeats the file_id each time the end of the list is reached
 
     file = files[file_id]
 
@@ -304,9 +207,7 @@ def play_sound_in_bg(SOUND_PATH):
 
 def stop_sound(player):
     if player:
-        os.killpg(
-            os.getpgid(player.pid), signal.SIGTERM
-        )  # Send the signal to all the process groups
+        os.killpg(os.getpgid(player.pid), signal.SIGTERM)  # Send the signal to all the process groups
 
 
 def check_player(player):
@@ -352,7 +253,8 @@ def button_call(gpio_mapping, GPIO, color, player, j):
 
 wait = 0.05
 player = None
-play_color_effect = None
+j = 0
+do_color_effect = True
 color = [0, 0, 256]
 
 gpio_mapping = {
@@ -374,7 +276,7 @@ gpio_mapping = {
     },
 }
 
-j = 0
+
 while True:  # Run forever
     ###########################
     # Show the color stuff, the functions must change with j
@@ -382,7 +284,7 @@ while True:  # Run forever
 
     time.sleep(wait)
 
-    if play_color_effect:
+    if do_color_effect:
         color_effect(pixels, j, color)
     else:
         set_rainbow_colors_offset(pixels, j)
@@ -391,4 +293,4 @@ while True:  # Run forever
 
     color, player, j = button_call(gpio_mapping, GPIO, color, player, j)
 
-    play_color_effect, player = check_player(player)
+    do_color_effect, player = check_player(player)

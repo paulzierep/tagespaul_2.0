@@ -37,9 +37,9 @@ ifconfig wlan0
 
 * Install the requirements to run the copy2rpi.py script with conda/mamba
 
-    ```bash
-    mamba create --name tagespaul-remote --file requirements.txt
-    ```
+```bash
+mamba create --name tagespaul-remote --file requirements.txt
+```
 
 * Add the PI IP address in the `.env` file.
 
@@ -55,11 +55,16 @@ update the folder on the PI with this script.
 
 ## SSH on the PI and setup the script
 
+###
+
+Activate SPI: https://www.raspberrypi-spy.co.uk/2014/08/enabling-the-spi-interface-on-the-raspberry-pi/
+
 ### Install requirements on PI
 
 ```bash
+mkdir -p /home/pi/Projects/tagespaul_2.0
 cd /home/pi/Projects/tagespaul_2.0/
-pip install -r requirements_PI.txt
+pip3 install -r requirements_PI.txt
 sudo apt-get install mplayer #we use mplayer to play the sounds
 ```
 
@@ -86,5 +91,34 @@ sudo chmod +x /etc/rc.local
 
 # TODO 
 
-* fix sound folder
+* fix sound folder (add empty folder)
 * PI pi set
+* remove
+
+# Ideas
+
+## Spotify 
+
+Note: **does not work on pi yet**
+
+Install:
+* https://askubuntu.com/questions/1102282/qdbus-returns-an-error-ubuntu-18-04 (qdbus-qt5)
+* sudo apt install libdbus-1-dev
+
+Play:
+
+```
+dbus-send  --print-reply --session --type=method_call --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.OpenUri "string:spotify:album:4sb0eMpDn3upAFfyi4q2rw" #https://community.spotify.com/t5/Desktop-Linux/DBus-OpenUri-not-playing/td-p/1233569
+```
+
+### Help
+
+* https://community.spotify.com/t5/Desktop-Linux/Basic-controls-via-command-line/td-p/4295625
+
+### rpi
+
+Install:
+
+```
+
+```
